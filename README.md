@@ -176,7 +176,7 @@ The Live Call feature uses **WebRTC-style push-to-talk**:
 
 ## 👩‍💻 Author
 
-**Menna Allah Ahmed Mohmed**  
+**Menna Ashraf**  
 Biomedical Engineering · AI & Medical Devices Specialist  
 NTI Graduate Training Program — Biomedical AI Track
 
