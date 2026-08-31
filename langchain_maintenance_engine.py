@@ -24,7 +24,7 @@ from langchain_community.chat_message_histories import ChatMessageHistory
 # ─────────────────────────────────────────────────────────────
 # 1. Path & Hardware Configuration
 # ─────────────────────────────────────────────────────────────
-BASE_DIR = r"D:\New folder (6)\Maintience NTI"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 INDEX_DIR = os.path.join(BASE_DIR, "faiss_bge_small_index")
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -44,15 +44,37 @@ embeddings = HuggingFaceEmbeddings(
 vectorstore = FAISS.load_local(INDEX_DIR, embeddings, allow_dangerous_deserialization=True)
 
 # ─────────────────────────────────────────────────────────────
-# 3. LLM Configuration via Ollama
+# 3. LLM Configuration (Ollama / Cloud Fallback)
 # ─────────────────────────────────────────────────────────────
-print("🤖 [LangChain Engine] Initializing ChatOllama (Qwen 2.5 7B, temp=0.1)...")
-llm = ChatOllama(
-    model="qwen2.5:7b",
-    temperature=0.1,
-    num_ctx=2048,
-    num_predict=180
-)
+ollama_host = os.getenv("OLLAMA_HOST", "")
+groq_api_key = os.getenv("GROQ_API_KEY", "")
+
+try:
+    import streamlit as st
+    if not ollama_host and hasattr(st, "secrets") and "OLLAMA_HOST" in st.secrets:
+        ollama_host = st.secrets["OLLAMA_HOST"]
+    if not groq_api_key and hasattr(st, "secrets") and "GROQ_API_KEY" in st.secrets:
+        groq_api_key = st.secrets["GROQ_API_KEY"]
+except Exception:
+    pass
+
+if groq_api_key:
+    try:
+        from langchain_groq import ChatGroq
+        print("🤖 [LangChain Engine] Initializing ChatGroq (qwen-2.5-72b-instruct)...")
+        llm = ChatGroq(model_name="qwen-2.5-72b-instruct", groq_api_key=groq_api_key, temperature=0.1)
+    except Exception as e:
+        print(f"⚠️ ChatGroq init failed: {e}. Falling back to ChatOllama...")
+        kwargs = {"model": "qwen2.5:7b", "temperature": 0.1, "num_ctx": 2048, "num_predict": 180}
+        if ollama_host:
+            kwargs["base_url"] = ollama_host
+        llm = ChatOllama(**kwargs)
+else:
+    print(f"🤖 [LangChain Engine] Initializing ChatOllama (Qwen 2.5 7B, host={ollama_host or 'localhost'})...")
+    kwargs = {"model": "qwen2.5:7b", "temperature": 0.1, "num_ctx": 2048, "num_predict": 180}
+    if ollama_host:
+        kwargs["base_url"] = ollama_host
+    llm = ChatOllama(**kwargs)
 
 # ─────────────────────────────────────────────────────────────
 # 4. Prompt Template with Conversational Memory & Safety Rules

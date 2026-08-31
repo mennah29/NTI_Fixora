@@ -87,7 +87,8 @@ def get_fixora_svg(size=36):
 # ─────────────────────────────────────────────────────────────
 import json
 
-HISTORY_FILE = os.path.join(r"D:\New folder (6)\Maintience NTI", "fixora_saved_sessions.json")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+HISTORY_FILE = os.path.join(BASE_DIR, "fixora_saved_sessions.json")
 
 def load_all_sessions():
     if os.path.exists(HISTORY_FILE):

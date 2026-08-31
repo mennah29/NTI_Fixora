@@ -13,8 +13,8 @@ env/
 .env/
 
 # ─── Large Model & Binary Files ─────────────────────────────────
-# FAISS index (binary, regeneratable from knowledge base)
-faiss_bge_small_index/
+# FAISS index (tracked for cloud deployment)
+# faiss_bge_small_index/
 
 # Large test model binary
 test_tiny_model.bin

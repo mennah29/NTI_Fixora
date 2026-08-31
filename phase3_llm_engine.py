@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 import ollama
 from typing import List, Dict, Any, Tuple
@@ -9,6 +10,19 @@ class MaintenanceLLMEngine:
     def __init__(self, model_name: str = "qwen2.5:7b", temperature: float = 0.1):
         self.model_name = model_name
         self.temperature = temperature
+        
+        host = os.getenv("OLLAMA_HOST", "")
+        try:
+            import streamlit as st
+            if not host and hasattr(st, "secrets") and "OLLAMA_HOST" in st.secrets:
+                host = st.secrets["OLLAMA_HOST"]
+        except Exception:
+            pass
+
+        if host:
+            self.client = ollama.Client(host=host)
+        else:
+            self.client = ollama
 
     def _build_system_prompt(self, device_name: str = "Biomedical Equipment") -> str:
         return (
@@ -96,9 +110,9 @@ class MaintenanceLLMEngine:
             "device": device_name
         }
 
-        # Call local Ollama Qwen 2.5 with optimized context window (fits better in VRAM)
+        # Call Ollama Qwen 2.5 (local or remote via host)
         if stream:
-            response_stream = ollama.chat(
+            response_stream = self.client.chat(
                 model=self.model_name,
                 messages=[
                     {"role": "system", "content": self._build_system_prompt(device_name)},
@@ -107,7 +121,7 @@ class MaintenanceLLMEngine:
                 options={
                     "temperature": self.temperature,
                     "top_p": 0.9,
-                    "num_ctx": 2048,   # Optimized for 4GB VRAM
+                    "num_ctx": 2048,   # Optimized for VRAM
                     "num_predict": 512 # Cap response length for fast generation
                 },
                 stream=True
@@ -118,7 +132,7 @@ class MaintenanceLLMEngine:
             return token_generator(), metadata
 
         # Non-streaming for Audio TTS
-        response = ollama.chat(
+        response = self.client.chat(
             model=self.model_name,
             messages=[
                 {"role": "system", "content": self._build_system_prompt(device_name)},
@@ -131,6 +145,15 @@ class MaintenanceLLMEngine:
                 "num_predict": 512
             }
         )
+
+        raw_output = response["message"]["content"]
+
+        return {
+            "spoken_text": raw_output,
+            "has_safety_hazard": has_hazard,
+            "citations": citations,
+            "device": device_name
+        }
 
         raw_output = response["message"]["content"]
 

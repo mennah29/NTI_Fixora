@@ -18,7 +18,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 # ─────────────────────────────────────────────────────────────────────────────
 # Configuration
 # ─────────────────────────────────────────────────────────────────────────────
-BASE_DIR  = r"D:\New folder (6)\Maintience NTI"
+BASE_DIR  = os.path.dirname(os.path.abspath(__file__))
 INDEX_DIR = os.path.join(BASE_DIR, "faiss_bge_small_index")
 MODEL     = "BAAI/bge-small-en-v1.5"
 
@@ -78,13 +78,19 @@ def retrieve_solution(
     detected_code = code_match.group(0).upper() if code_match else None
 
     # 2. Construct search prompt
-    if detected_code:
-        search_query = f"Error Code: {detected_code} | Symptoms: {query}"
+    if device_name and device_name.strip().upper() not in ["ALL DEVICES", "ALL", ""]:
+        prefix = f"{device_name} "
     else:
-        search_query = query
+        prefix = ""
+
+    if detected_code:
+        search_query = f"{prefix}Error Code: {detected_code} | Symptoms: {query}"
+    else:
+        search_query = f"{prefix}{query}"
 
     # 3. Dense similarity retrieval (retrieve broad candidate set)
-    candidates = vector_store.similarity_search(search_query, k=candidate_pool)
+    effective_k = max(candidate_pool, 300) if prefix else candidate_pool
+    candidates = vector_store.similarity_search(search_query, k=effective_k)
 
     # 4. Strict Isolation 100% by Device Key
     if device_name and device_name.strip().upper() not in ["ALL DEVICES", "ALL", ""]:
