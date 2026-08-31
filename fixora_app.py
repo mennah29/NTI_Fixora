@@ -542,6 +542,8 @@ def render_procedure_card(raw_text: str, citations: list, device: str):
 # ─────────────────────────────────────────────────────────────
 # ZONE A: LEFT SIDEBAR
 # ─────────────────────────────────────────────────────────────
+inject_signature_styles()
+
 with st.sidebar:
     sidebar_top = (
         f'<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">'
