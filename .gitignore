@@ -1,0 +1,51 @@
+# ─── Python Cache ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.pyc
+
+# ─── Virtual Environments ───────────────────────────────────────
+venv/
+env/
+.venv/
+.env/
+
+# ─── Large Model & Binary Files ─────────────────────────────────
+# FAISS index (binary, regeneratable from knowledge base)
+faiss_bge_small_index/
+
+# Large test model binary
+test_tiny_model.bin
+
+# Large knowledge base JSON (>9MB) - include instructions to rebuild
+final_knowledge_base.json
+
+# Raw PDF manuals folder (too large for git)
+valid_manuals/
+
+# Generated WAV audio files
+*.wav
+*.mp3
+
+# ─── Personal / Runtime Data ────────────────────────────────────
+# Chat history sessions (personal data)
+fixora_saved_sessions.json
+
+# Evaluation results (generated at runtime)
+evaluation_results.json
+eval_test_audio.wav
+
+# ─── OS & Editor Files ──────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# ─── Logs ───────────────────────────────────────────────────────
+*.log
+logs/
