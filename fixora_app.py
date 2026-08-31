@@ -9,10 +9,36 @@ import textwrap
 # Set UTF-8 encoding
 sys.stdout.reconfigure(encoding='utf-8')
 
-from audio_production import ProductionAudioEngine
-from phase3_llm_engine import MaintenanceLLMEngine
-from smart_retriever import retrieve_solution
-from langchain_maintenance_engine import ask_assistant
+# ── Safe imports — graceful fallback for Streamlit Cloud (no GPU/heavy models) ─
+try:
+    from audio_production import ProductionAudioEngine
+    AUDIO_AVAILABLE = True
+except Exception as _e:
+    AUDIO_AVAILABLE = False
+    ProductionAudioEngine = None
+
+try:
+    from phase3_llm_engine import MaintenanceLLMEngine
+    LLM_AVAILABLE = True
+except Exception as _e:
+    LLM_AVAILABLE = False
+    MaintenanceLLMEngine = None
+
+try:
+    from smart_retriever import retrieve_solution
+    RETRIEVER_AVAILABLE = True
+except Exception as _e:
+    RETRIEVER_AVAILABLE = False
+    def retrieve_solution(*args, **kwargs):
+        return {"top_chunks": [], "detected_code": None}
+
+try:
+    from langchain_maintenance_engine import ask_assistant
+    LANGCHAIN_AVAILABLE = True
+except Exception as _e:
+    LANGCHAIN_AVAILABLE = False
+    def ask_assistant(*args, **kwargs):
+        return "⚠️ AI engine not available in cloud demo mode. Please run locally with a GPU for full functionality."
 
 # ─────────────────────────────────────────────────────────────
 # Page Configuration

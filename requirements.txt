@@ -1,35 +1,35 @@
-# Core Framework
+# ─── Core Framework ──────────────────────────────────────────────────────────
 streamlit>=1.40.0
 fastapi>=0.115.0
 uvicorn>=0.30.0
 pydantic>=2.0.0
 
-# LLM & RAG
+# ─── LLM & RAG ───────────────────────────────────────────────────────────────
 ollama>=0.4.0
 langchain>=0.3.0
 langchain-ollama>=0.2.0
 langchain-community>=0.3.0
 langchain-core>=0.3.0
 
-# Vector Store & Embeddings
-faiss-cpu>=1.8.0          # Use faiss-gpu for CUDA acceleration
+# ─── Vector Store & Embeddings ───────────────────────────────────────────────
+faiss-cpu>=1.8.0
 sentence-transformers>=3.0.0
 torch>=2.0.0
 transformers>=4.40.0
 
-# Speech (STT + TTS)
-openai-whisper>=20231117
-kokoro>=0.9.0             # Kokoro-82M Neural TTS
-sounddevice>=0.4.6
+# ─── Speech: TTS ─────────────────────────────────────────────────────────────
+edge-tts>=6.1.0           # Cloud-friendly TTS fallback (no GPU required)
+# kokoro>=0.9.0           # Local GPU TTS (uncomment for local deployment)
+# faster-whisper>=1.0.0   # Local GPU STT (uncomment for local deployment)
+
+# ─── Audio Processing ────────────────────────────────────────────────────────
 soundfile>=0.12.1
-
-# Document Processing
-PyMuPDF>=1.24.0           # PDF parsing (fitz)
-
-# HTTP & Utilities
-requests>=2.31.0
 numpy>=1.24.0
-python-multipart>=0.0.9
-
-# Audio
 scipy>=1.11.0
+
+# ─── Document Processing ─────────────────────────────────────────────────────
+PyMuPDF>=1.24.0
+
+# ─── HTTP & Utilities ────────────────────────────────────────────────────────
+requests>=2.31.0
+python-multipart>=0.0.9
