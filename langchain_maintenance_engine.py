@@ -151,6 +151,7 @@ def create_isolated_retriever(device_name: str, top_k: int = 5):
     return vectorstore.as_retriever(
         search_kwargs={
             "k": top_k,
+            "fetch_k": 300,
             "filter": filter_func
         }
     )
@@ -179,7 +180,8 @@ def ask_assistant(
     strict device isolation, and multi-turn contextual memory.
     """
     retriever = create_isolated_retriever(device_name, top_k=5)
-    retrieved_docs = retriever.invoke(question)
+    search_q = f"{device_name} {question}" if device_name and device_name.strip().upper() not in ["ALL DEVICES", "ALL", ""] else question
+    retrieved_docs = retriever.invoke(search_q)
 
     if not retrieved_docs:
         msg = f"I could not locate troubleshooting procedures for '{device_name}' matching that issue in the authorized service manual."
