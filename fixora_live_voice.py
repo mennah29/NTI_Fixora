@@ -81,6 +81,26 @@ def parse_steps_from_text(raw_text: str):
 
     return hazard_warning, " ".join(overview_lines), steps
 
+def prepare_speech_text(text: str) -> str:
+    """Prepares text specifically for natural human voice synthesis."""
+    if not text:
+        return text
+    # Remove markdown symbols (*, #, _, `, etc.)
+    cleaned = re.sub(r'[\*\#\_\`]', '', text)
+    # Remove brackets like [Source: ...], [HIGH RISK HAZARD]
+    cleaned = re.sub(r'\[.*?\]', '', cleaned)
+    # Remove raw citations like (Page 48), (Page 12)
+    cleaned = re.sub(r'\([Pp]age\s*\d+\)', '', cleaned)
+    # Convert numbered items like 1. 2. 3. into natural spoken transitions
+    cleaned = re.sub(r'^\s*1\.\s*', 'First, ', cleaned, flags=re.MULTILINE)
+    cleaned = re.sub(r'^\s*2\.\s*', 'Second, ', cleaned, flags=re.MULTILINE)
+    cleaned = re.sub(r'^\s*3\.\s*', 'Third, ', cleaned, flags=re.MULTILINE)
+    cleaned = re.sub(r'^\s*\d+\.\s*', 'Next, ', cleaned, flags=re.MULTILINE)
+    # Replace newlines with simple sentence pauses
+    cleaned = re.sub(r'[\r\n]+', '. ', cleaned)
+    cleaned = re.sub(r'\s+', ' ', cleaned).strip()
+    return cleaned
+
 @app.post("/api/chat")
 async def chat_endpoint(payload: ChatQuery):
     t0 = time.time()
@@ -102,9 +122,10 @@ async def chat_endpoint(payload: ChatQuery):
         spoken_text = rag_out["spoken_text"]
         citations = rag_out.get("citations", [])
 
-    # 2. Neural Audio Synthesis (Kokoro-82M)
+    # 2. Neural Audio Synthesis (Kokoro-82M) — Optimized for Speech
+    speech_text = prepare_speech_text(spoken_text)
     out_audio_file = f"voice_{uuid.uuid4().hex[:6]}.wav"
-    audio_path = audio_engine.synthesize(spoken_text, out_audio_file)
+    audio_path = audio_engine.synthesize(speech_text, out_audio_file)
     
     # Encode Audio to Base64
     audio_base64 = ""

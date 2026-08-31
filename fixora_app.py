@@ -1008,7 +1008,7 @@ if st.session_state.live_call_active:
                     if (data.audio_base64) {{
                         statusLabel.innerText = 'SPEAKING...';
                         orb.className = 'voice-orb speaking';
-                        hintLabel.innerText = 'Assistant is speaking — listening automatically after...';
+                        hintLabel.innerText = 'Assistant is responding...';
 
                         if (currentAudio) {{ currentAudio.pause(); }}
                         currentAudio = new Audio("data:audio/wav;base64," + data.audio_base64);
@@ -1017,18 +1017,16 @@ if st.session_state.live_call_active:
                         }});
 
                         currentAudio.onended = function() {{
-                            statusLabel.innerText = 'LISTENING...';
-                            orb.className = 'voice-orb listening';
-                            hintLabel.innerText = 'Speak now — assistant is listening';
-                            setTimeout(() => {{
-                                if (!isListening) {{
-                                    recognition.start();
-                                }}
-                            }}, 500);
+                            statusLabel.innerText = 'CLICK ORB TO SPEAK';
+                            orb.className = 'voice-orb';
+                            hintLabel.innerText = 'Tap the glowing orb to speak again';
+                            isListening = false;
                         }};
                     }} else {{
                         statusLabel.innerText = 'CLICK ORB TO SPEAK';
                         orb.className = 'voice-orb';
+                        hintLabel.innerText = 'Tap the glowing orb to speak again';
+                        isListening = false;
                     }}
                 }} catch (e) {{
                     console.error(e);
